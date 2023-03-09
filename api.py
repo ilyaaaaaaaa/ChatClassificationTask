@@ -7,10 +7,10 @@ import numpy as np
 import pandas as pd
 
 # загружаем модели
-with open('/Users/ilya/Downloads/Text_classification_task/model.pickle', 'rb') as f:
+with open('model.pickle', 'rb') as f:
     model = pickle.load(f)
 
-with open('/Users/ilya/Downloads/Text_classification_task/w2v.pickle', 'rb') as f:
+with open('w2v.pickle', 'rb') as f:
     w2v = pickle.load(f)
 
     
