@@ -1,4 +1,4 @@
-Команда чтобы запустить апи: `python Text_classification_task/api.py`
+Команда чтобы запустить апи: `python api.py`
 
 Деплой тут: http://127.0.0.1:5000/
 
