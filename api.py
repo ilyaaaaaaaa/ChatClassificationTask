@@ -6,6 +6,34 @@ import json
 import numpy as np
 import pandas as pd
 
+
+# предобработка текста
+# заготовим стоп-слова
+from nltk.corpus import stopwords
+from stop_words import get_stop_words
+russian_stopwords = stopwords.words('russian')
+russian_stopwords_2 = get_stop_words('russian')
+russian_stopwords  = list(set(russian_stopwords) | set(russian_stopwords_2))
+
+from string import punctuation
+deleted_symols = punctuation + '0123456789'
+
+from pymystem3 import Mystem
+mystem = Mystem() 
+
+def prepare(text, deleted_symols=deleted_symols, russian_stopwords=russian_stopwords, mystem=mystem):
+    '''
+    функция для предобработки текста
+    '''
+    # удалим знаки пунктуации и числа
+    text = ''.join([char for char in text if str(char) not in deleted_symols])
+    # удалим стоп-слова
+    text = ' '.join([word for word in text.lower().split(' ') if word not in russian_stopwords])
+    # лематизируем слова
+    text = ''.join(mystem.lemmatize(text)).strip()
+    return text
+
+
 # загружаем модели
 with open('model.pickle', 'rb') as f:
     model = pickle.load(f)
@@ -14,7 +42,7 @@ with open('w2v.pickle', 'rb') as f:
     w2v = pickle.load(f)
 
     
-# функции для предобработки текста и предикта   
+# функции для векторизации текста и предикта   
 def w2v_trans_word(word, w2v=w2v):
     '''
     вспомогательная функция для обработки слов, которых нет в словаре
@@ -55,12 +83,12 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    doc = request.form.to_dict()
-    prob = get_pred(doc)
+    doc = request.form.to_dict()['review_text']
+    prob = get_pred(prepare(doc))
     pred = 'pos' if prob>=0.5 else 'neg'
     prob = round(prob*100)
     prob = prob if pred=='pos' else 100-prob
-    return flask.render_template('predict.html', input_doc=doc, prediction=pred, prob=prob)
+    return flask.render_template('predict.html', prediction=pred, prob=prob)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='localhost', port=5000)
+    app.run(debug=True, port=5000) # , host='localhost'
